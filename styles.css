@@ -1877,6 +1877,72 @@ kbd {
   line-height: 1.65;
 }
 
+.apk-download {
+  display: flex;
+  margin-top: 10px;
+  padding: 11px 13px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.apk-download:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft-2);
+  transform: translateY(-1px);
+}
+
+.apk-glyph {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.apk-glyph svg {
+  width: 18px;
+  height: 18px;
+}
+
+.apk-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.apk-copy strong {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.apk-copy small {
+  color: var(--muted);
+  font-size: 9.5px;
+}
+
+.apk-badge {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-number);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 .install-dialog .dialog-foot {
   margin-top: 16px;
 }

@@ -4,13 +4,19 @@
 
 **在线试玩：** <https://kriye-hu.github.io/sudoku-studio/>
 
+**Android APK：** [下载安装包](https://github.com/Kriye-hu/sudoku-studio/releases/latest/download/sudoku-studio-1.0.0.apk) · 无需 Chrome、Google Play 或谷歌服务，Android 8.0+。
+
+[![Build Android APK](https://github.com/Kriye-hu/sudoku-studio/actions/workflows/android.yml/badge.svg)](https://github.com/Kriye-hu/sudoku-studio/actions/workflows/android.yml)
+
 ![数独 Studio 桌面预览](preview/desktop.png)
 
 ## 打开方式
 
 电脑上直接双击 `index.html`，或把它拖进 Chrome / Edge 即可。无需安装、无需构建、无需联网。
 
-**想放到手机上当 App 用：** 需要把整个文件夹部署到 HTTPS 静态站点，具体步骤见 [INSTALL.md](INSTALL.md)。
+**Android 用户：** 直接下载上面的 APK 安装即可，不依赖谷歌浏览器或 Google 服务。
+
+**iPhone / 想用网页版：** 需要把整个文件夹部署到 HTTPS 静态站点，具体步骤见 [INSTALL.md](INSTALL.md)。
 
 ```
 sudoku/
@@ -21,6 +27,8 @@ sudoku/
 ├─ manifest.webmanifest  PWA 应用信息
 ├─ sw.js                 离线缓存 Service Worker
 ├─ icons/                手机桌面与主屏幕图标
+├─ android/              Android WebView 原生壳工程
+├─ .github/workflows/    自动构建并签名 APK
 ├─ INSTALL.md            部署与安装到手机的完整说明
 ├─ README.md
 └─ preview/              桌面、手机与安装界面预览图
@@ -37,8 +45,9 @@ sudoku/
 - **桌面键盘**：`1–9` 填数、`N` 笔记、`H` 提示、`Backspace` 擦除、`Ctrl/Cmd+Z` 撤销、空格暂停、方向键移动。
 - **手机适配**：9 键数字条、横屏双栏、小屏 320px 可用。
 - **明暗主题**：默认跟随系统，也可手动切换并记住选择。
-- **可安装 App**：Android 安装提示、iPhone 添加到主屏幕引导、独立全屏运行。
-- **离线游玩**：Service Worker 缓存应用外壳，断网后仍可继续玩。
+- **可安装 App**：Android APK（无需谷歌服务）、iPhone 添加到主屏幕引导、独立全屏运行。
+- **离线游玩**：APK 自带全部资源；网页版通过 Service Worker 缓存，断网后仍可继续玩。
+- **自动构建**：GitHub Actions 生成签名 APK，签名密钥只保存在仓库 Secrets 中。
 
 ## 一点说明
 

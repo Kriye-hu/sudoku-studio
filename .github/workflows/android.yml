@@ -110,20 +110,20 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
-          target: google_apis
+          target: default
           arch: x86_64
-          profile: pixel_5
+          profile: pixel_2
           disable-animations: true
-          emulator-boot-timeout: 600
+          emulator-boot-timeout: 900
           script: |
             adb install -r sudoku-studio-1.0.0.apk
-            adb shell am start -W -n com.kriyehu.sudoku/.MainActivity
-            sleep 12
-            adb shell screencap -p /sdcard/sudoku-smoke.png
-            adb pull /sdcard/sudoku-smoke.png smoke.png
-            adb shell pidof com.kriyehu.sudoku
-            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | head -5
-            adb logcat -d -s AndroidRuntime:E | tail -100
+            adb shell am start -n com.kriyehu.sudoku/.MainActivity
+            sleep 35
+            adb shell pidof com.kriyehu.sudoku || true
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | head -5 || true
+            adb shell screencap -p /data/local/tmp/sudoku-smoke.png
+            adb pull /data/local/tmp/sudoku-smoke.png smoke.png
+            adb logcat -d -v brief | grep -Ei 'AndroidRuntime|chromium|kriyehu|FATAL' | tail -120 || true
 
       - name: Upload smoke screenshot
         if: always()

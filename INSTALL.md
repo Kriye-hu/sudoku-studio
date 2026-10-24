@@ -1,21 +1,43 @@
 # 把数独装到手机上
 
-这个版本已经是可安装的 **PWA（渐进式网页应用）**：不需要应用商店，添加到手机主屏幕后会像普通 App 一样全屏打开，并且支持离线游玩。
+## 方式一：Android APK（推荐，不需要 Chrome / 谷歌服务）
+
+**下载地址：** <https://github.com/Kriye-hu/sudoku-studio/releases/latest/download/sudoku-studio-1.0.0.apk>
+
+这个安装包自带完整游戏资源，不依赖 Google Play、Chrome 或谷歌服务，使用 Android 系统自带的 WebView 运行。系统要求：**Android 8.0 及以上**。
+
+安装步骤：
+
+1. 用手机浏览器打开上面的下载链接，下载 APK。
+2. 在文件管理器或浏览器下载列表中点击 APK。
+3. 如果系统提示，允许当前浏览器或文件管理器「安装未知应用」。
+4. 点击「安装」，桌面会出现蓝色「数独」图标。
+5. 如果 Play Protect 或手机管家提示风险，选择「仍要安装」即可；这是未上架应用商店的自签名安装包。
+
+APK 也可以通过 QQ、网盘或数据线直接发给其他安卓用户安装。
+
+更新版本时下载新的 APK 覆盖安装即可；使用同一签名，进度会保留。
+
+---
+
+## 方式二：iPhone / 网页版 PWA
+
+这个版本同时是 **PWA（渐进式网页应用）**：不需要应用商店，添加到手机主屏幕后会像普通 App 一样全屏打开，并且支持离线游玩。
 
 > 注意：直接双击 `index.html` 只能玩网页，**不能安装**。浏览器只允许 HTTPS 网站（或电脑本机的 `localhost`）注册离线缓存和安装到主屏幕。所以需要先把整个文件夹放到一个 HTTPS 静态网站上。
 
-## 第一步：部署到 HTTPS
+### 第一步：部署到 HTTPS
 
 整个文件夹都要上传，不能只传 `index.html`。推荐任选一种：
 
-### 方案 A：Netlify Drop（最省事）
+#### 方案 A：Netlify Drop（最省事）
 
 1. 打开 <https://app.netlify.com/drop>，按页面提示免费登录。
 2. 把整个 `sudoku` 文件夹拖进页面；如果拿到的是压缩包，先解压。
 3. 等它上传完成，会得到一个类似 `https://xxxx.netlify.app` 的网址。
 4. 用手机浏览器打开这个网址。
 
-### 方案 B：GitHub Pages
+#### 方案 B：GitHub Pages
 
 1. 在 GitHub 新建一个仓库。
 2. 把 `sudoku` 文件夹里的内容上传到仓库根目录，确保根目录能直接看到 `index.html`。
@@ -23,7 +45,7 @@
 4. **Build and deployment** 选择 **Deploy from a branch**，分支选 `main`，目录选 `/ (root)`，保存。
 5. 一两分钟后，访问 `https://你的用户名.github.io/仓库名/`。
 
-### 方案 C：Vercel / Cloudflare Pages
+#### 方案 C：Vercel / Cloudflare Pages
 
 同样选择静态站点部署，把 `sudoku` 文件夹作为项目根目录即可，构建命令留空，输出目录设为 `/`。
 
@@ -35,16 +57,16 @@
 
 如果入口没有出现：确认访问的是 HTTPS 地址、没有使用微信内置浏览器，并且这个 App 还没有安装过。已经安装时入口会自动隐藏；也可以直接用浏览器菜单里的「安装应用 / 添加到主屏幕」。
 
-## 第二步：安装到手机
+### 第二步：安装到手机
 
-### Android（Chrome / Edge）
+#### Android（Chrome / Edge）
 
 1. 用 Chrome 或 Edge 打开部署好的 HTTPS 网址。
 2. 等页面加载完，点击底部「装到手机主屏幕 → 安装」。
 3. 也可以在浏览器菜单里选择 **安装应用** 或 **添加到主屏幕**。
 4. 桌面上会出现蓝色「数独」图标。
 
-### iPhone / iPad（必须用 Safari）
+#### iPhone / iPad（必须用 Safari）
 
 1. 用 **Safari** 打开网址。微信、QQ 等 App 内置浏览器不行，请先选「在 Safari 中打开」。
 2. 点击 Safari 底部工具栏的 **分享** 按钮（方框带向上箭头）。
@@ -67,18 +89,24 @@
 改完代码后，把 [sw.js](sw.js) 里的版本号改一下，例如：
 
 ```js
-const CACHE_NAME = 'sudoku-studio-v2';
+const CACHE_NAME = 'sudoku-studio-v3';
 ```
 
 然后重新上传文件。手机再次打开 App 时，新版本会在后台更新；关闭再打开一次即可看到。
 
-## 想要真正的 APK / 上架应用商店？
+Android APK 的更新方式不同：修改网页后，GitHub Actions 会重新构建 APK，把新安装包上传到 Releases；用户下载后覆盖安装即可，只要签名不变，本地进度就会保留。
 
-安装到主屏幕已经能满足日常手机使用。如果一定要安装包：
+## 关于 APK 和上架应用商店
 
-- **Android APK**：先用上面的方式部署出 HTTPS 网址，再把网址提交到 [PWABuilder](https://www.pwabuilder.com/)，它可以生成 Android 安装包；上 Google Play 还需要开发者账号和签名。
-- **iPhone IPA**：需要 Apple Developer 账号、Xcode 和签名，成本更高；个人使用建议直接用 Safari 添加到主屏幕。
-- **Capacitor**：如果之后要做原生能力（推送、内购、离线数据库等），可以用 Capacitor 把现有网页包进 Android / iOS 工程。
+这个项目的 Android APK 是原生 WebView 壳，网页资源全部打包在 APK 内，因此不需要执行上面的网页部署，也不依赖 Chrome / Google 服务。
+
+当前 APK 已用自签名证书签名，可以直接分发安装。若要上架 Google Play 或国内应用商店，还需要：
+
+- 开发者账号和应用商店审核
+- 隐私政策、应用截图、软著等材料（国内商店通常需要）
+- 后续版本继续使用同一签名密钥
+
+如果只是给身边用户使用，直接分享 APK 或 GitHub Releases 链接就够了。
 
 ---
 

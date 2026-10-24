@@ -19,6 +19,7 @@
   const MAX_HISTORY = 240;
   const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const IS_ANDROID = /android/i.test(navigator.userAgent);
   const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   const IS_INSTALLABLE_CONTEXT = location.protocol === 'http:' || location.protocol === 'https:';
@@ -76,7 +77,8 @@
     closeInstallBtn: document.getElementById('closeInstallBtn'),
     installDoneBtn: document.getElementById('installDoneBtn'),
     iosSteps: document.getElementById('iosSteps'),
-    genericSteps: document.getElementById('genericSteps')
+    genericSteps: document.getElementById('genericSteps'),
+    apkDownload: document.getElementById('apkDownload')
   };
 
   const state = {
@@ -1156,6 +1158,7 @@
 
     els.iosSteps.hidden = !IS_IOS;
     els.genericSteps.hidden = IS_IOS;
+    els.apkDownload.hidden = !IS_ANDROID;
 
     if (IS_STANDALONE) return;
 
@@ -1230,6 +1233,7 @@
   function openInstallDialog() {
     els.iosSteps.hidden = !IS_IOS;
     els.genericSteps.hidden = IS_IOS;
+    els.apkDownload.hidden = !IS_ANDROID;
     if (els.newGameDialog.open) closeNewGameDialog();
     if (typeof els.installDialog.showModal === 'function') {
       if (!els.installDialog.open) els.installDialog.showModal();

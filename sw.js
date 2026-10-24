@@ -2,7 +2,7 @@
 'use strict';
 
 // Bump this version whenever the app shell changes.
-const CACHE_NAME = 'sudoku-studio-v2';
+const CACHE_NAME = 'sudoku-studio-v3';
 
 const APP_SHELL = [
   './',

@@ -6,3 +6,17 @@ desktop.ini
 
 # Local browser/test profiles
 .chrome-*/
+
+# Android build outputs and local-only files
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/www/
+*.apk
+*.aab
+*.p12
+*.jks
+keystore.properties
+signing/

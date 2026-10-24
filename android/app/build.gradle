@@ -1,0 +1,87 @@
+plugins {
+    id 'com.android.application'
+}
+
+def repoRoot = rootProject.projectDir.parentFile
+def generatedWebAssets = layout.buildDirectory.dir('generated/webAssets').get().asFile
+def keystorePath = System.getenv('ANDROID_KEYSTORE_PATH')
+
+android {
+    namespace 'com.kriyehu.sudoku'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.kriyehu.sudoku'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+
+        resourceConfigurations += ['zh', 'en']
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storeType 'PKCS12'
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            if (keystorePath) {
+                signingConfig signingConfigs.release
+            }
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs += generatedWebAssets
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+}
+
+tasks.register('syncWebAssets', Sync) {
+    from(repoRoot) {
+        include 'index.html'
+        include 'styles.css'
+        include 'sudoku.js'
+        include 'app.js'
+        include 'manifest.webmanifest'
+        include 'sw.js'
+        include 'icons/**'
+    }
+    into new File(generatedWebAssets, 'www')
+}
+
+tasks.named('preBuild').configure {
+    dependsOn 'syncWebAssets'
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('merge') && task.name.endsWith('Assets')) {
+        task.dependsOn 'syncWebAssets'
+    }
+}

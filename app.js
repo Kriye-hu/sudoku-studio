@@ -22,6 +22,7 @@
   const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   const IS_INSTALLABLE_CONTEXT = location.protocol === 'http:' || location.protocol === 'https:';
+  const IS_NATIVE_APP = new URLSearchParams(location.search).get('app') === 'android';
 
   const els = {
     board: document.getElementById('board'),
@@ -1129,6 +1130,13 @@
     }
     els.themeToggle.setAttribute('aria-label', next === 'dark' ? '切换到浅色模式' : '切换到深色模式');
     els.themeToggle.setAttribute('title', next === 'dark' ? '切换到浅色模式' : '切换到深色模式');
+    if (window.SudokuNative && typeof window.SudokuNative.setDarkMode === 'function') {
+      try {
+        window.SudokuNative.setDarkMode(next === 'dark');
+      } catch (error) {
+        /* The native shell is optional; the browser ignores this call. */
+      }
+    }
     if (persist) {
       try {
         localStorage.setItem(THEME_KEY, next);
@@ -1143,6 +1151,7 @@
      ========================================================= */
 
   function initInstallExperience() {
+    if (IS_NATIVE_APP) return;
     if (!IS_INSTALLABLE_CONTEXT || !window.isSecureContext) return;
 
     els.iosSteps.hidden = !IS_IOS;
@@ -1240,6 +1249,7 @@
   }
 
   function registerServiceWorker() {
+    if (IS_NATIVE_APP) return;
     if (!('serviceWorker' in navigator) || !IS_INSTALLABLE_CONTEXT) return;
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('./sw.js').catch(function (error) {

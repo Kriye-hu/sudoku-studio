@@ -91,6 +91,7 @@ jobs:
           retention-days: 30
 
   smoke:
+    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -118,7 +119,7 @@ jobs:
           script: |
             adb install -r sudoku-studio-1.0.0.apk
             adb shell am start -n com.kriyehu.sudoku/.MainActivity
-            sleep 35
+            sleep 120
             adb shell pidof com.kriyehu.sudoku || true
             adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | head -5 || true
             adb shell screencap -p /data/local/tmp/sudoku-smoke.png

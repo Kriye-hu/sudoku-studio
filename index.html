@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f2f7fb" id="themeColor">
+<meta name="description" content="一款安静、顺手的数独。支持手机与电脑，即时生成唯一解题目，自动保存进度，可安装到主屏幕离线游玩。">
+<meta name="application-name" content="数独">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="数独">
+<title>数独 · 一局静心</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232d6f9e'/%3E%3Cpath d='M22 12v40M42 12v40M12 22h40M12 42h40' stroke='%23eef7fd' stroke-width='2' opacity='.55'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-size='30' font-weight='700' fill='%23ffffff'%3E9%3C/text%3E%3C/svg%3E">
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('sudoku-studio-theme-v1');
+      var theme = saved === 'dark' || saved === 'light'
+        ? saved
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+    } catch (error) {
+      document.documentElement.dataset.theme = 'light';
+    }
+  })();
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="ambient ambient-one" aria-hidden="true"></div>
+<div class="ambient ambient-two" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 44 44" fill="none">
+        <rect x="4.5" y="4.5" width="35" height="35" rx="7" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+        <path d="M16 5v34M28 5v34M5 16h34M5 28h34" stroke="currentColor" stroke-width="1" opacity=".3"/>
+        <text x="22" y="28.5" text-anchor="middle" fill="currentColor" font-family="Georgia, 'Songti SC', serif" font-size="22" font-weight="700">9</text>
+      </svg>
+    </span>
+    <span class="brand-text">
+      <span class="brand-cn">数独</span>
+      <span class="brand-en">SUDOKU STUDIO</span>
+    </span>
+  </div>
+
+  <div class="top-actions">
+    <span class="top-level" id="topLevel">中等</span>
+    <button class="icon-btn theme-toggle" id="themeToggle" type="button" aria-label="切换到深色模式" title="切换主题">
+      <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.6 14.2A8.2 8.2 0 0 1 9.8 3.4 8.4 8.4 0 1 0 20.6 14.2Z"/>
+      </svg>
+    </button>
+    <button class="btn btn-primary" id="newGameBtn" type="button">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      <span>新游戏</span>
+    </button>
+  </div>
+</header>
+
+<main class="game-shell">
+  <section class="board-card" aria-labelledby="boardTitle">
+    <h2 class="sr-only" id="boardTitle">数独棋盘</h2>
+
+    <div class="board-meta">
+      <div class="meta-cluster">
+        <span class="level-chip" id="levelChip">
+          <span class="level-dot" aria-hidden="true"></span>
+          <span id="levelName">中等</span>
+        </span>
+        <span class="meta-stat" title="错误次数">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5"/>
+            <path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/>
+          </svg>
+          <span id="mistakeCount">0</span>
+          <span class="sr-only">次错误</span>
+        </span>
+        <span class="meta-stat" title="使用提示次数">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18h6M10 21h4"/>
+            <path d="M12 3a6 6 0 0 0-4 10.1c.7.7 1 1.4 1 2.2h6c0-.8.3-1.5 1-2.2A6 6 0 0 0 12 3Z"/>
+          </svg>
+          <span id="hintCount">0</span>
+          <span class="sr-only">次提示</span>
+        </span>
+      </div>
+
+      <div class="meta-cluster">
+        <span class="timer" id="timer" aria-label="用时">00:00</span>
+        <button class="icon-btn pause-btn" id="pauseBtn" type="button" aria-label="暂停游戏" title="暂停游戏">
+          <svg class="icon icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M9 5v14M15 5v14"/>
+          </svg>
+          <svg class="icon icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8 5.6v12.8a1 1 0 0 0 1.53.85l10-6.4a1 1 0 0 0 0-1.7l-10-6.4A1 1 0 0 0 8 5.6Z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="board-frame" id="boardFrame">
+      <div class="board" id="board" role="grid" aria-label="数独棋盘，使用方向键移动，数字键填入"></div>
+
+      <div class="board-cover pause-cover" id="pauseCover" hidden>
+        <div class="cover-card">
+          <span class="cover-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <path d="M9 5v14M15 5v14"/>
+            </svg>
+          </span>
+          <p class="eyebrow">TAKE A BREATH</p>
+          <h2>先歇一小会儿</h2>
+          <p>计时已经暂停，棋盘替你收好了。</p>
+          <button class="btn btn-primary btn-wide" id="resumeBtn" type="button">继续游戏</button>
+        </div>
+      </div>
+
+      <div class="board-cover win-cover" id="winCover" hidden>
+        <div class="confetti" id="confetti" aria-hidden="true"></div>
+        <div class="cover-card win-card">
+          <p class="eyebrow">PUZZLE COMPLETE</p>
+          <h2>这一局，完成了。</h2>
+          <div class="win-time" id="winTime">00:00</div>
+          <p class="win-record" id="winRecord">新纪录</p>
+          <div class="win-stats">
+            <span><b id="winLevel">中等</b><em>难度</em></span>
+            <span><b id="winMistakes">0</b><em>错误</em></span>
+            <span><b id="winHints">0</b><em>提示</em></span>
+          </div>
+          <div class="cover-actions">
+            <button class="btn btn-primary" id="againBtn" type="button">再来一局</button>
+            <button class="btn btn-ghost" id="winChangeBtn" type="button">换个难度</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="board-cover loading-cover" id="loadingCover" hidden>
+        <div class="loading-inner" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>正在铺一方新棋盘…</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-track" role="progressbar" aria-label="完成进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text" id="progressText">0%</span>
+    </div>
+
+    <p class="status-line" id="statusLine" aria-live="polite">选一个空格，慢慢推演。</p>
+  </section>
+
+  <section class="play-panel" id="playPanel" aria-label="棋盘操作">
+    <div class="tool-row">
+      <button class="tool" id="undoBtn" type="button" title="撤销 (Ctrl+Z)" disabled>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 14 4 9l5-5"/>
+          <path d="M4 9h9a6 6 0 0 1 0 12h-3"/>
+        </svg>
+        <span>撤销</span>
+      </button>
+      <button class="tool" id="eraseBtn" type="button" title="擦除 (Backspace)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m7 20-3.2-3.2a2 2 0 0 1 0-2.8L14.6 3.2a2 2 0 0 1 2.8 0l4.6 4.6a2 2 0 0 1 0 2.8L13.4 20H7Z"/>
+          <path d="m10 9 6 6M13.4 20H21"/>
+        </svg>
+        <span>擦除</span>
+      </button>
+      <button class="tool" id="notesBtn" type="button" title="笔记模式 (N)" aria-pressed="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        </svg>
+        <span>笔记</span>
+        <kbd>N</kbd>
+      </button>
+      <button class="tool" id="hintBtn" type="button" title="提示 (H)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 18h6M10 21h4"/>
+          <path d="M12 3a6 6 0 0 0-4 10.1c.7.7 1 1.4 1 2.2h6c0-.8.3-1.5 1-2.2A6 6 0 0 0 12 3Z"/>
+        </svg>
+        <span>提示</span>
+        <kbd>H</kbd>
+      </button>
+    </div>
+
+    <div class="numpad" id="numpad" aria-label="数字键盘"></div>
+
+    <div class="mode-row">
+      <span class="mode-status">
+        <span class="mode-dot" id="modeDot" aria-hidden="true"></span>
+        <span id="modeText">填入模式</span>
+      </span>
+      <span class="mode-tip" id="modeTip">先选格子，再点数字</span>
+    </div>
+
+    <div class="install-strip" id="installStrip" hidden>
+      <button class="install-main" id="installBtn" type="button">
+        <span class="install-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="2.5" width="12" height="19" rx="3"/>
+            <path d="M12 6v8M8.8 10.8 12 14l3.2-3.2M10 18.2h4"/>
+          </svg>
+        </span>
+        <span class="install-copy">
+          <strong>装到手机主屏幕</strong>
+          <small>全屏打开 · 离线也能玩</small>
+        </span>
+        <span class="install-cta">安装</span>
+      </button>
+      <button class="install-dismiss" id="installDismiss" type="button" aria-label="暂时不安装">×</button>
+    </div>
+  </section>
+
+  <aside class="side-panel" aria-label="游戏记录">
+    <section class="record-card">
+      <p class="eyebrow">JOURNAL</p>
+      <h2>你的静心记录</h2>
+      <div class="record-main">
+        <span>当前难度最佳</span>
+        <strong id="bestTime">—</strong>
+      </div>
+      <div class="best-list" id="bestList">
+        <div class="best-row" data-best-row="easy"><span>轻松</span><span data-best="easy">—</span></div>
+        <div class="best-row" data-best-row="medium"><span>中等</span><span data-best="medium">—</span></div>
+        <div class="best-row" data-best-row="hard"><span>困难</span><span data-best="hard">—</span></div>
+        <div class="best-row" data-best-row="expert"><span>专家</span><span data-best="expert">—</span></div>
+      </div>
+      <p class="completed-line">已经完成 <strong id="completedCount">0</strong> 局</p>
+      <p class="record-tip">键盘 1–9 填数 · N 笔记 · H 提示</p>
+    </section>
+
+    <section class="guide-card">
+      <h2>快捷键</h2>
+      <dl class="shortcuts">
+        <div><dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>填入数字</dd></div>
+        <div><dt><kbd>N</kbd></dt><dd>切换笔记</dd></div>
+        <div><dt><kbd>H</kbd></dt><dd>获得提示</dd></div>
+        <div><dt><kbd>Ctrl</kbd><kbd>Z</kbd></dt><dd>撤销一步</dd></div>
+        <div><dt><kbd>Space</kbd></dt><dd>暂停 / 继续</dd></div>
+        <div><dt><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>移动格子</dd></div>
+      </dl>
+    </section>
+
+    <p class="side-quote">“不是每一格都要马上填满。”</p>
+  </aside>
+</main>
+
+<footer class="app-footer">
+  <span>专注当下，慢一点也没关系。</span>
+  <span class="footer-mark">SUDOKU STUDIO · 9×9</span>
+</footer>
+
+<dialog class="dialog" id="newGameDialog" aria-labelledby="dialogTitle">
+  <div class="dialog-head">
+    <div>
+      <p class="eyebrow">NEW PUZZLE</p>
+      <h2 id="dialogTitle">开始新的一局</h2>
+      <p>进度会自动保存。选择难度后，当前这一局将被替换。</p>
+    </div>
+    <button class="icon-btn dialog-close" id="closeDialogBtn" type="button" aria-label="关闭">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="level-grid" id="levelGrid">
+    <button class="level-option" data-level="easy" type="button">
+      <span class="level-option-head"><span class="level-name">轻松</span><span class="level-en">EASY</span></span>
+      <span class="level-desc">留足线索，适合热身</span>
+      <span class="level-meta"><span>约 41 提示</span><span>约 4 分钟</span></span>
+      <span class="level-bars" aria-hidden="true"><i style="width:28%"></i></span>
+    </button>
+    <button class="level-option" data-level="medium" type="button">
+      <span class="level-option-head"><span class="level-name">中等</span><span class="level-en">MEDIUM</span></span>
+      <span class="level-desc">需要一点耐心和推理</span>
+      <span class="level-meta"><span>约 33 提示</span><span>约 8 分钟</span></span>
+      <span class="level-bars" aria-hidden="true"><i style="width:52%"></i></span>
+    </button>
+    <button class="level-option" data-level="hard" type="button">
+      <span class="level-option-head"><span class="level-name">困难</span><span class="level-en">HARD</span></span>
+      <span class="level-desc">线索收紧，专注推演</span>
+      <span class="level-meta"><span>约 29 提示</span><span>约 15 分钟</span></span>
+      <span class="level-bars" aria-hidden="true"><i style="width:76%"></i></span>
+    </button>
+    <button class="level-option" data-level="expert" type="button">
+      <span class="level-option-head"><span class="level-name">专家</span><span class="level-en">EXPERT</span></span>
+      <span class="level-desc">为长时间的安静思考准备</span>
+      <span class="level-meta"><span>约 25 提示</span><span>约 25 分钟</span></span>
+      <span class="level-bars" aria-hidden="true"><i style="width:100%"></i></span>
+    </button>
+  </div>
+
+  <div class="dialog-foot">
+    <span>每局即时生成，保证唯一解</span>
+    <button class="text-btn" id="continueBtn" type="button">继续当前这局</button>
+  </div>
+</dialog>
+
+<dialog class="dialog install-dialog" id="installDialog" aria-labelledby="installTitle">
+  <div class="dialog-head">
+    <div>
+      <p class="eyebrow">HOME SCREEN</p>
+      <h2 id="installTitle">把数独装到手机</h2>
+      <p>不用应用商店，直接从浏览器添加到主屏幕。</p>
+    </div>
+    <button class="icon-btn dialog-close" id="closeInstallBtn" type="button" aria-label="关闭">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="install-steps" id="iosSteps" hidden>
+    <div class="install-step">
+      <span class="step-number">1</span>
+      <div><strong>用 Safari 打开</strong><p>如果是微信或其他 App 内置浏览器，请先选择“在 Safari 中打开”。</p></div>
+    </div>
+    <div class="install-step">
+      <span class="step-number">2</span>
+      <div><strong>点一下“分享”</strong><p>就是 Safari 底部工具栏中间、带向上箭头的方框按钮。</p></div>
+    </div>
+    <div class="install-step">
+      <span class="step-number">3</span>
+      <div><strong>选择“添加到主屏幕”</strong><p>在菜单里向下滑，找到这个选项。</p></div>
+    </div>
+    <div class="install-step">
+      <span class="step-number">4</span>
+      <div><strong>点右上角“添加”</strong><p>回到桌面，就能看到数独 App 的蓝色图标了。</p></div>
+    </div>
+  </div>
+
+  <div class="install-steps" id="genericSteps">
+    <div class="install-step">
+      <span class="step-number">1</span>
+      <div><strong>用 Chrome 或 Edge 打开</strong><p>确认地址栏左侧是安全的 HTTPS 地址。</p></div>
+    </div>
+    <div class="install-step">
+      <span class="step-number">2</span>
+      <div><strong>打开浏览器菜单</strong><p>点击右上角的三个点，或底部工具栏的菜单按钮。</p></div>
+    </div>
+    <div class="install-step">
+      <span class="step-number">3</span>
+      <div><strong>选择“安装应用”</strong><p>如果没有看到，可以选择“添加到主屏幕”。</p></div>
+    </div>
+    <div class="install-step">
+      <span class="step-number">4</span>
+      <div><strong>确认安装</strong><p>之后就能从桌面图标全屏打开，进度与记录都会保留。</p></div>
+    </div>
+  </div>
+
+  <p class="install-note">首次打开需要联网加载。之后棋盘、计时和本地记录都可以离线使用。</p>
+
+  <div class="dialog-foot">
+    <span>安装后自动隐藏浏览器地址栏</span>
+    <button class="btn btn-primary install-done" id="installDoneBtn" type="button">知道了</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="sudoku.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

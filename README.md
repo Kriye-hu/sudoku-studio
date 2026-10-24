@@ -4,6 +4,8 @@
 
 **在线试玩：** <https://kriye-hu.github.io/sudoku-studio/>
 
+![数独 Studio 桌面预览](preview/desktop.png)
+
 ## 打开方式
 
 电脑上直接双击 `index.html`，或把它拖进 Chrome / Edge 即可。无需安装、无需构建、无需联网。

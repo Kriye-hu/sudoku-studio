@@ -6,6 +6,10 @@
 
 **Android APK：** [下载安装包](https://github.com/Kriye-hu/sudoku-studio/releases/latest/download/sudoku-studio-1.0.0.apk) · 无需 Chrome、Google Play 或谷歌服务，Android 8.0+。
 
+<a href="https://github.com/Kriye-hu/sudoku-studio/releases/latest/download/sudoku-studio-1.0.0.apk">
+  <img src="preview/apk-download-qr.png" width="170" alt="扫码下载 Android APK">
+</a>
+
 [![Build Android APK](https://github.com/Kriye-hu/sudoku-studio/actions/workflows/android.yml/badge.svg)](https://github.com/Kriye-hu/sudoku-studio/actions/workflows/android.yml)
 
 ![数独 Studio 桌面预览](preview/desktop.png)

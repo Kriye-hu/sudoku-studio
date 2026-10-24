@@ -89,3 +89,47 @@ jobs:
           path: dist/sudoku-studio-1.0.0.apk
           if-no-files-found: error
           retention-days: 30
+
+  smoke:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: sudoku-studio-android-apk
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Run on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          disable-animations: true
+          emulator-boot-timeout: 600
+          script: |
+            adb install -r sudoku-studio-1.0.0.apk
+            adb shell am start -W -n com.kriyehu.sudoku/.MainActivity
+            sleep 12
+            adb shell screencap -p /sdcard/sudoku-smoke.png
+            adb pull /sdcard/sudoku-smoke.png smoke.png
+            adb shell pidof com.kriyehu.sudoku
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | head -5
+            adb logcat -d -s AndroidRuntime:E | tail -100
+
+      - name: Upload smoke screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-smoke-screenshot
+          path: smoke.png
+          if-no-files-found: warn
+          retention-days: 7

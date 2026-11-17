@@ -288,6 +288,56 @@
     return true;
   }
 
+  /* ------------------------------------------------------------------
+   * 规则校验：只看「同行 / 同列 / 同宫有没有重复」
+   *
+   * 2026-11-17 补：原来 app.js 是拿「这一格是不是等于预设答案」当判据，
+   * 结果每填一格都在实时泄露答案对错（靠试错就能通关），
+   * 而且数独的规则本来就不是「一格固定一个数」。
+   * 判错、标红、通关都改走这三个函数，题目是否唯一解不影响判定。
+   * ------------------------------------------------------------------ */
+
+  /** 与 index 同行、同列、同宫的所有格子下标（不含自己）。 */
+  function peersOf(index) {
+    const out = [];
+    const row = (index / SIZE) | 0;
+    const col = index % SIZE;
+    const box = boxOf(index);
+    for (let i = 0; i < CELLS; i++) {
+      if (i === index) continue;
+      if (((i / SIZE) | 0) === row || (i % SIZE) === col || boxOf(i) === box) out.push(i);
+    }
+    return out;
+  }
+
+  /** 这一格的值是否和同行、同列、同宫里的某个数字重复。空格（0）永远不算冲突。 */
+  function conflictsAt(grid, index) {
+    const value = grid[index];
+    if (!(value >= 1 && value <= 9)) return false;
+    const peers = peersOf(index);
+    for (let k = 0; k < peers.length; k++) if (grid[peers[k]] === value) return true;
+    return false;
+  }
+
+  /** 盘面上所有处于冲突状态的格子下标。 */
+  function conflictingCells(grid) {
+    const out = [];
+    for (let i = 0; i < CELLS; i++) if (conflictsAt(grid, i)) out.push(i);
+    return out;
+  }
+
+  /** 盘面上还有没有冲突。 */
+  function hasConflict(grid) {
+    for (let i = 0; i < CELLS; i++) if (conflictsAt(grid, i)) return true;
+    return false;
+  }
+
+  /** 通关：填满 81 格，且没有任何重复。 */
+  function isSolvedGrid(grid) {
+    return isComplete(grid) && !hasConflict(grid);
+  }
+
+
   /**
    * Generate a puzzle with a guaranteed unique solution.
    * Cells are removed in rotationally symmetric pairs where possible.
@@ -358,6 +408,11 @@
     countSolutions: countSolutions,
     solve: solve,
     isComplete: isComplete,
-    sameGrid: sameGrid
+    sameGrid: sameGrid,
+    peersOf: peersOf,
+    conflictsAt: conflictsAt,
+    conflictingCells: conflictingCells,
+    hasConflict: hasConflict,
+    isSolved: isSolvedGrid
   };
 });

@@ -443,7 +443,7 @@
         if (puzzle[i] !== 0 && board[i] !== puzzle[i]) return null;
       }
 
-      const completed = board.every(function (value, index) { return value === solution[index]; });
+      const completed = Core.isSolved(board);
       if (completed) return null;
 
       return {
@@ -550,9 +550,9 @@
     state.lastChanged = index;
     markJustSet(index);
 
-    if (state.board[index] !== state.solution[index]) {
+    if (Core.conflictsAt(state.board, index)) {
       state.mistakes += 1;
-      setStatus('这个数字不对，再检查一下。', 'error');
+      setStatus('这个数字和同行、同列或同宫重复了。', 'error');
     } else {
       removePeerNotes(index, number);
       setStatus('很好，继续。', 'accent');
@@ -705,10 +705,8 @@
   }
 
   function isSolved() {
-    for (let i = 0; i < 81; i++) {
-      if (state.board[i] !== state.solution[i]) return false;
-    }
-    return true;
+    // 通关只看规则：填满 81 格且没有行列宫重复，不再逐格比对预设答案。
+    return Core.isSolved(state.board);
   }
 
   /* =========================================================
@@ -920,7 +918,8 @@
           && Math.floor(col / 3) === Math.floor(selectedCol / 3))
       );
       const isSame = selectedValue !== 0 && value === selectedValue && !isSelected;
-      const isWrong = value !== 0 && value !== state.solution[i] && !state.fixed[i];
+      // 标红只表示「和同行/同列/同宫撞了」，不是「和答案不一样」。
+      const isWrong = value !== 0 && !state.fixed[i] && Core.conflictsAt(state.board, i);
 
       if (isPeer) classes.push('is-peer');
       if (isSame) classes.push('is-same');
@@ -976,7 +975,9 @@
     const counts = new Array(10).fill(0);
     for (let i = 0; i < 81; i++) {
       const value = state.board[i];
-      if (value !== 0 && value === state.solution[i]) counts[value] += 1;
+      // 只数「盘面上已经放了这个数字」，不再只数「放对的」——
+      // 否则剩余个数会变成「刚才那步对不对」的实时提示。
+      if (value !== 0) counts[value] += 1;
     }
 
     for (let n = 1; n <= 9; n++) {
